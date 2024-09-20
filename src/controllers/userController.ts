@@ -1,19 +1,26 @@
-import { Request, Response } from "express"; 
-import { pool } from "../services/database.js"; 
+import { Request, Response } from "express";
+import { db } from "../services/database.js";
 
 export const userController = { 
-   getUsers: (_: Request, res: Response) => {                        
-	  pool.query('SELECT * FROM users').then(result => {
-		 return res.status(200).json(result);
+   getUsers: (req: Request, res: Response) => {
+	  db.queryAll("users").then(result => {
+		 req.users = result;
+		 return res.status(200).json(req.users);
 	  }).catch(err => {
-		 return res.status(500).json({ error: err.message });
+		 return res.status(500).json({ message: err });
 	  });
-   },
-   getUser: (_: Request, res: Response) => {
-      return res.status(200).json({ message: 'user retrieved' });
    },
    postUser: (_: Request, res: Response) => {
       return res.status(200).json({ message: 'user posted' });
+   },
+   getUser: (req: Request, res: Response) => {
+	  const { id } = req.params;
+	  db.queryIt(`SELECT * FROM users WHERE id=${id}`).then(result => {
+		 req.users = result;
+		 return res.status(200).json(req.users);
+	  }).catch(err => {
+		 return res.status(500).json({ message: err });
+	  });
    },
    putUser: (_: Request, res: Response) => {
       return res.status(200).json({ message: 'user putted' });
