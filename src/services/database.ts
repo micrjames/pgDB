@@ -19,12 +19,41 @@ export const db = {
 	   port: db_config.port,
 	   database: db_config.database
    }),
-   queryIt: async (query: string): Promise<pg.QueryResult | null> => {
+   queryIt: async (table: string, clause: string = "", column: string = '*', cmd: string = "SELECT"): Promise<pg.QueryResult | null> => {
 	  let queryResult: (pg.QueryResult | null) = null;
-	  queryResult = await db.pool.query(query)
+	  queryResult = await db.pool.query(`${cmd} ${column} FROM ${table} ${clause}`);
 	  return queryResult;
    }, 
    queryAll: async (table: string): Promise<pg.QueryResult | null> => {
-	  return await db.queryIt(`SELECT * FROM ${table}`);
+	  return await db.queryIt(table);
+   },
+   insertInto: async (table: string) => {
+	  const client = await db.pool.connect();
+	  const query = `
+		 INSERT INTO ${table} VALUES ();			
+	  `;
+	  client.query(query, (err, _) => {
+		 if(err) {
+			console.error(err);
+			return;
+		 }
+		 console.log('Data delete successful');
+		 client.release();
+	  });
+   },
+   deleteFrom: async (table: string, id: number) => {
+	  const client = await db.pool.connect();
+	  const query = `
+		 DELETE FROM ${table}
+			WHERE id = ${id}
+	  `;
+	  client.query(query, (err, _) => {
+		 if(err) {
+			console.error(err);
+			return;
+		 }
+		 console.log('Data delete successful');
+		 client.release();
+	  });
    }
 };
